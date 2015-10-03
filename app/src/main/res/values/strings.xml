@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Homegate</string>
     <string name="action_settings">Settings</string>
+    <string name="ipsum">Lorem Ipsum</string>
+    <string name="entering_geofence">ETERING GEOFENCE</string>
+    <string name="exiting_geofence">EXITING GEOFENCE</string>
+    <string name="start_geofence_service">Geofence Started</string>
 </resources>
