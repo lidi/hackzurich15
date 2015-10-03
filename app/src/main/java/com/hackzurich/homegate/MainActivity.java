@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements LoadPropertiesTas
     @Override
     public void onDataLoaded(List<Property> data) {
         mData = data;
-        PropertiesAdapter adapter = new PropertiesAdapter(data);
+        PropertiesAdapter adapter = new PropertiesAdapter(data,this);
         mRecyclerview.setAdapter(adapter);
     }
 

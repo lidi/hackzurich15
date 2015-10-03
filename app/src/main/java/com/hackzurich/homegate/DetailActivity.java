@@ -2,6 +2,7 @@ package com.hackzurich.homegate;
 
 import com.bumptech.glide.Glide;
 import com.hackzurich.homegate.adapter.RatingsAdapter;
+import com.hackzurich.homegate.adapter.ScreenSlidePagerAdapter;
 import com.hackzurich.homegate.model.PropertyDetail;
 import com.hackzurich.homegate.model.Rating;
 import com.hackzurich.homegate.model.RatingRequest;
@@ -13,6 +14,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,6 +45,9 @@ public class DetailActivity extends AppCompatActivity implements LoadDetailsTask
     private RatingBar mRatingBarUser;
     private long mAddId;
     private Button mSubmit;
+    private ViewPager mPager;
+    private ScreenSlidePagerAdapter mPagerAdapter;
+    private ImageView mBackdrop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +78,7 @@ public class DetailActivity extends AppCompatActivity implements LoadDetailsTask
         mSubmit = (Button) findViewById(R.id.submit);
         mSubmit.setOnClickListener(this);
         mRatingBarUser = (RatingBar) findViewById(R.id.ratingBarUser);
+        mPager = (ViewPager) findViewById(R.id.pager);
     }
 
     private void fetchDetails() {
@@ -107,8 +113,8 @@ public class DetailActivity extends AppCompatActivity implements LoadDetailsTask
     }
 
     private void loadBackdrop() {
-        final ImageView imageView = (ImageView) findViewById(R.id.backdrop);
-        Glide.with(this).load(mImageUrl).centerCrop().into(imageView);
+        mBackdrop = (ImageView) findViewById(R.id.backdrop);
+        Glide.with(this).load(mImageUrl).centerCrop().into(mBackdrop);
     }
 
     @Override
@@ -116,6 +122,14 @@ public class DetailActivity extends AppCompatActivity implements LoadDetailsTask
         TextView description = (TextView) findViewById(R.id.description);
         description.setText(data.getDescription());
         loadRating(data.getRatingResponse());
+        List<String> images = data.getImages();
+        if (images.size() > 0) {
+            mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager(), images);
+            mPager.setAdapter(mPagerAdapter);
+            mPager.setPageTransformer(true, new ZoomOutPageTransformer());
+            mPager.setVisibility(View.VISIBLE);
+            mBackdrop.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -132,7 +146,7 @@ public class DetailActivity extends AppCompatActivity implements LoadDetailsTask
     public void onClick(View v) {
         PostReviewTask task = new PostReviewTask(this);
         float rating = mRatingBarUser.getRating();
-        if (rating>0) {
+        if (rating > 0) {
             RatingRequest request = new RatingRequest();
             request.setComment(mComment.getText().toString());
             request.setRating(rating);
@@ -149,5 +163,44 @@ public class DetailActivity extends AppCompatActivity implements LoadDetailsTask
         mRatingBarUser.setIsIndicator(true);
         mComment.setEnabled(false);
         fetchDetails();
+    }
+
+    public class ZoomOutPageTransformer implements ViewPager.PageTransformer {
+        private static final float MIN_SCALE = 0.85f;
+        private static final float MIN_ALPHA = 0.5f;
+
+        public void transformPage(View view, float position) {
+            int pageWidth = view.getWidth();
+            int pageHeight = view.getHeight();
+
+            if (position < -1) { // [-Infinity,-1)
+                // This page is way off-screen to the left.
+                view.setAlpha(0);
+
+            } else if (position <= 1) { // [-1,1]
+                // Modify the default slide transition to shrink the page as well
+                float scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position));
+                float vertMargin = pageHeight * (1 - scaleFactor) / 2;
+                float horzMargin = pageWidth * (1 - scaleFactor) / 2;
+                if (position < 0) {
+                    view.setTranslationX(horzMargin - vertMargin / 2);
+                } else {
+                    view.setTranslationX(-horzMargin + vertMargin / 2);
+                }
+
+                // Scale the page down (between MIN_SCALE and 1)
+                view.setScaleX(scaleFactor);
+                view.setScaleY(scaleFactor);
+
+                // Fade the page relative to its size.
+                view.setAlpha(MIN_ALPHA +
+                        (scaleFactor - MIN_SCALE) /
+                                (1 - MIN_SCALE) * (1 - MIN_ALPHA));
+
+            } else { // (1,+Infinity]
+                // This page is way off-screen to the right.
+                view.setAlpha(0);
+            }
+        }
     }
 }

@@ -3,6 +3,8 @@ package com.hackzurich.homegate.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PropertyDetail {
 
@@ -21,6 +23,9 @@ public class PropertyDetail {
     private String mCurrency;
 
     RatingResponse mRatingResponse;
+
+    @JsonProperty("pictures")
+    private List<String> mImages;
 
     public String getIconUrl() {
         return mIconUrl;
@@ -76,5 +81,13 @@ public class PropertyDetail {
 
     public void setCurrency(String currency) {
         mCurrency = currency;
+    }
+
+    public List<String> getImages() {
+        return mImages;
+    }
+
+    public void setImages(List<String> images) {
+        mImages = images;
     }
 }

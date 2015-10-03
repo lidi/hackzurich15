@@ -5,8 +5,10 @@ import com.hackzurich.homegate.DetailActivity;
 import com.hackzurich.homegate.R;
 import com.hackzurich.homegate.model.Property;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,8 +20,11 @@ import java.util.List;
 
 public class PropertiesAdapter extends RecyclerView.Adapter<PropertiesAdapter.ViewHolder> {
 
-    public PropertiesAdapter(List<Property> values) {
+    private final Activity mActivity;
+
+    public PropertiesAdapter(List<Property> values, Activity activity) {
         mValues = values;
+        mActivity = activity;
     }
 
     private List<Property> mValues;
@@ -32,7 +37,7 @@ public class PropertiesAdapter extends RecyclerView.Adapter<PropertiesAdapter.Vi
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         final Property property = mValues.get(position);
         Glide.with(holder.mImageView.getContext())
                 .load(property.getIconUrl())
@@ -46,12 +51,14 @@ public class PropertiesAdapter extends RecyclerView.Adapter<PropertiesAdapter.Vi
             @Override
             public void onClick(View v) {
                 Context context = v.getContext();
+                holder.mImageView.setTransitionName("rent");
                 Intent intent = new Intent(context, DetailActivity.class);
                 intent.putExtra(DetailActivity.EXTRA_ID, property.getId());
                 intent.putExtra(DetailActivity.EXTRA_IMAGE_URL, property.getIconUrl());
                 intent.putExtra(DetailActivity.EXTRA_TITLE, property.getTitle());
-
-                context.startActivity(intent);
+                ActivityOptionsCompat options = ActivityOptionsCompat.
+                        makeSceneTransitionAnimation(mActivity, holder.mImageView, "profile");
+                mActivity.startActivity(intent);
             }
         });
     }
