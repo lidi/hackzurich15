@@ -3,22 +3,27 @@ package com.hackzurich.homegate.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.parceler.Parcel;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Parcel
 public class Property {
 
     @JsonProperty("picFilename1Medium")
-    private String mIconUrl;
+    String mIconUrl;
     @JsonProperty("advertismentId")
     private long mId;
 
     @JsonProperty("title")
-    private String mTitle;
+    String mTitle;
     @JsonProperty("street")
-    private String mStreet;
+    String mStreet;
     @JsonProperty("sellingPrice")
-    private String mPrice;
+    String mPrice;
     @JsonProperty("currency")
-    private String mCurrency;
+    String mCurrency;
+    @JsonProperty("geoLocation")
+    String mGeoLocation;
 
     public String getIconUrl() {
         return mIconUrl;
@@ -66,5 +71,15 @@ public class Property {
 
     public void setId(long id) {
         mId = id;
+    }
+
+    public double getLatitude() {
+        String[] tokens = mGeoLocation.split(",");
+        return Double.valueOf(tokens[1]);
+    }
+
+    public double getLongitute() {
+        String[] tokens = mGeoLocation.split(",");
+        return Double.valueOf(tokens[0]);
     }
 }

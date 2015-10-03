@@ -41,7 +41,7 @@ public final class Constants {
     public static final String ANDROID_BUILDING_ID = "1";
     public static final double ANDROID_BUILDING_LATITUDE = 47.389844;
     public static final double ANDROID_BUILDING_LONGITUDE = 8.5156248;
-    public static final float ANDROID_BUILDING_RADIUS_METERS = 600.0f;
+    public static final float ANDROID_BUILDING_RADIUS_METERS = 60.0f;
 
     // Geofence parameters for the Yerba Buena Gardens near the Moscone Center in San Francisco.
     public static final String YERBA_BUENA_ID = "2";

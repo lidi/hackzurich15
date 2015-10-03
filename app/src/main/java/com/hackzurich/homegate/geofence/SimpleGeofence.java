@@ -18,6 +18,8 @@ package com.hackzurich.homegate.geofence;
 
 import com.google.android.gms.location.Geofence;
 
+import com.hackzurich.homegate.model.Property;
+
 /**
  * A single Geofence object, defined by its center and radius.
  */
@@ -28,8 +30,11 @@ public class SimpleGeofence {
     private final double mLatitude;
     private final double mLongitude;
     private final float mRadius;
+    private final String mImgUrl;
     private long mExpirationDuration;
     private int mTransitionType;
+    private Property mProperty;
+    private String mTitle;
 
     /**
      * @param geofenceId The Geofence's request ID.
@@ -38,16 +43,32 @@ public class SimpleGeofence {
      * @param radius Radius of the geofence circle in meters.
      * @param expiration Geofence expiration duration.
      * @param transition Type of Geofence transition.
+     * @param property
      */
-    public SimpleGeofence(String geofenceId, double latitude, double longitude, float radius,
-            long expiration, int transition) {
+    public SimpleGeofence(float radius,
+            long expiration, int transition, Property property) {
         // Set the instance fields from the constructor.
-        this.mId = geofenceId;
-        this.mLatitude = latitude;
-        this.mLongitude = longitude;
+        this.mId = String.valueOf(property.getId());
+        this.mLatitude = property.getLatitude();
+        this.mLongitude = property.getLongitute();
         this.mRadius = radius;
         this.mExpirationDuration = expiration;
         this.mTransitionType = transition;
+        this.mImgUrl = property.getIconUrl();
+        mTitle = property.getTitle();
+        mProperty = property;
+    }
+
+    public SimpleGeofence(String id, double lat, double lng, float radius, long expirationDuration,
+            int transitionType, String imgUrl, String title) {
+        this.mId = id;
+        this.mLatitude = lat;
+        this.mLongitude = lng;
+        this.mRadius = radius;
+        this.mExpirationDuration = expirationDuration;
+        this.mTransitionType = transitionType;
+        this.mImgUrl = imgUrl;
+        mTitle = title;
     }
 
     // Instance field getters.
@@ -70,6 +91,10 @@ public class SimpleGeofence {
         return mTransitionType;
     }
 
+    public String getImgUrl() {
+        return mImgUrl;
+    }
+
     /**
      * Creates a Location Services Geofence object from a SimpleGeofence.
      * @return A Geofence object.
@@ -84,4 +109,7 @@ public class SimpleGeofence {
                 .build();
     }
 
+    public String getTitle() {
+        return mTitle;
+    }
 }

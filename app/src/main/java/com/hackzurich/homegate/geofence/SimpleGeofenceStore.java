@@ -34,6 +34,8 @@ import static com.hackzurich.homegate.geofence.Constants.KEY_TRANSITION_TYPE;
  */
 public class SimpleGeofenceStore {
 
+    private static final String KEY_IMG_URL = "keyImage";
+    private static final String KEY_TITLE = "Title";
     // The SharedPreferences object in which geofences are stored.
     private final SharedPreferences mPrefs;
     // The name of the SharedPreferences.
@@ -71,7 +73,9 @@ public class SimpleGeofenceStore {
                 && radius != INVALID_FLOAT_VALUE
                 && expirationDuration != INVALID_LONG_VALUE
                 && transitionType != INVALID_INT_VALUE) {
-            return new SimpleGeofence(id, lat, lng, radius, expirationDuration, transitionType);
+            String imgUrl= mPrefs.getString(getGeofenceFieldKey(id, KEY_IMG_URL), "");
+            String title = mPrefs.getString(getGeofenceFieldKey(id, KEY_TITLE), "");
+            return new SimpleGeofence(id, lat, lng, radius, expirationDuration, transitionType, imgUrl, title);
         }
         // Otherwise, return null.
         return null;
@@ -93,6 +97,8 @@ public class SimpleGeofenceStore {
                 geofence.getExpirationDuration());
         prefs.putInt(getGeofenceFieldKey(id, KEY_TRANSITION_TYPE),
                 geofence.getTransitionType());
+        prefs.putString(getGeofenceFieldKey(id, KEY_IMG_URL),geofence.getImgUrl());
+        prefs.putString(getGeofenceFieldKey(id, KEY_TITLE),geofence.getTitle());
         // Commit the changes.
         prefs.commit();
     }
@@ -107,6 +113,8 @@ public class SimpleGeofenceStore {
         prefs.remove(getGeofenceFieldKey(id, KEY_RADIUS));
         prefs.remove(getGeofenceFieldKey(id, KEY_EXPIRATION_DURATION));
         prefs.remove(getGeofenceFieldKey(id, KEY_TRANSITION_TYPE));
+        prefs.remove(getGeofenceFieldKey(id, KEY_IMG_URL));
+        prefs.remove(getGeofenceFieldKey(id, KEY_TITLE));
         prefs.commit();
     }
 

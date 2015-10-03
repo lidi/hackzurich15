@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.hackzurich.homegate.FilterActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+
+    </android.support.design.widget.AppBarLayout>
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:backgroundTint="@color/colorPrimary"
+        android:text="Submit"
+        android:id="@+id/submit"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"/>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/til"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/view"
+        android:layout_margin="8dp"
+        android:layout_marginTop="16dp">
+
+        <EditText
+            android:id="@+id/priceLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Price min:"
+            android:inputType="number"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <SeekBar
+        android:id="@+id/seekBarMin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/til"
+        android:layout_margin="16dp"
+        android:max="50"/>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/tilMax"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seekBarMin"
+        android:layout_margin="8dp">
+
+        <EditText
+            android:id="@+id/priceLabelMax"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Price max:"
+            android:inputType="number"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <SeekBar
+        android:id="@+id/seekBarMax"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/tilMax"
+        android:layout_margin="16dp"
+        android:max="50"/>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/tilRoom"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/seekBarMax"
+        android:layout_margin="8dp">
+
+        <EditText
+            android:id="@+id/roomLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Rooms min:"
+            android:inputType="number"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <SeekBar
+        android:id="@+id/seekBarRoom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/tilRoom"
+        android:layout_margin="16dp"
+        android:max="20"/>
+</RelativeLayout>

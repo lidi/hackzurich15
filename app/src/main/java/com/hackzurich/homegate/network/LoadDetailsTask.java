@@ -32,9 +32,21 @@ public class LoadDetailsTask extends AsyncTask<Long, Void, PropertyDetail> {
     @Override
     protected PropertyDetail doInBackground(Long... params) {
         java.net.URL url = null;
+        PropertyDetail response = null;
+        response = getPropertyDetail(response, params[0]);
+        getRating();
+        return response;
+    }
+
+    private void getRating() {
+
+    }
+
+    private PropertyDetail getPropertyDetail(PropertyDetail response, Long param) {
+        java.net.URL url;
         HttpsURLConnection mURLConnection = null;
         try {
-            String uri = URL + params[0] + "?language=en";
+            String uri = URL + param + "?language=en";
             url = new URL(uri);
             mURLConnection = (HttpsURLConnection) url.openConnection();
             mURLConnection.setDoInput(true);
@@ -42,8 +54,7 @@ public class LoadDetailsTask extends AsyncTask<Long, Void, PropertyDetail> {
             mURLConnection.setRequestProperty("auth", TOKEN);
             if (mURLConnection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                 InputStream in = new BufferedInputStream(mURLConnection.getInputStream());
-                PropertyDetail response = readStream(in);
-                return response;
+                response = readStream(in);
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -51,7 +62,7 @@ public class LoadDetailsTask extends AsyncTask<Long, Void, PropertyDetail> {
             e.printStackTrace();
             mURLConnection.disconnect();
         }
-        return null;
+        return response;
     }
 
     private PropertyDetail readStream(InputStream inputStream) throws IOException {

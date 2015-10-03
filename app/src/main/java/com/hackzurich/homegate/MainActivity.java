@@ -31,28 +31,22 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hackzurich.homegate.geofence.Constants.ANDROID_BUILDING_ID;
-import static com.hackzurich.homegate.geofence.Constants.ANDROID_BUILDING_LATITUDE;
-import static com.hackzurich.homegate.geofence.Constants.ANDROID_BUILDING_LONGITUDE;
 import static com.hackzurich.homegate.geofence.Constants.ANDROID_BUILDING_RADIUS_METERS;
 import static com.hackzurich.homegate.geofence.Constants.CONNECTION_FAILURE_RESOLUTION_REQUEST;
 import static com.hackzurich.homegate.geofence.Constants.GEOFENCE_EXPIRATION_TIME;
-import static com.hackzurich.homegate.geofence.Constants.YERBA_BUENA_ID;
-import static com.hackzurich.homegate.geofence.Constants.YERBA_BUENA_LATITUDE;
-import static com.hackzurich.homegate.geofence.Constants.YERBA_BUENA_LONGITUDE;
-import static com.hackzurich.homegate.geofence.Constants.YERBA_BUENA_RADIUS_METERS;
 
 public class MainActivity extends AppCompatActivity implements LoadPropertiesTask.Listener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = MainActivity.class.getName();
+    public static final String EXTRA_PRICE_MIN = "extraPriceMin";
+    public static final String EXTRA_PRICE_MAX = "extraPriceMax";
+    public static final String EXTRA_ROOM_MIN = "extraRoomMin";
     // Internal List of Geofence objects. In a real app, these might be provided by an API based on
     // locations within the user's proximity.
     List<Geofence> mGeofenceList;
 
     // These will store hard-coded geofences in this sample app.
-    private SimpleGeofence mAndroidBuildingGeofence;
-    private SimpleGeofence mYerbaBuenaGeofence;
 
     // Persistent storage for geofences.
     private SimpleGeofenceStore mGeofenceStorage;
@@ -61,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements LoadPropertiesTas
     // Stores the PendingIntent used to request geofence monitoring.
     private PendingIntent mGeofenceRequestIntent;
     private GoogleApiClient mApiClient;
+    private List<Property> mData;
 
     // Defines the allowable request types (in this example, we only add geofences).
     private enum REQUEST_TYPE {
@@ -83,8 +78,8 @@ public class MainActivity extends AppCompatActivity implements LoadPropertiesTas
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar.make(view, "Geofence Initialized", Snackbar.LENGTH_SHORT).show();
+                initGeofence(mData);
             }
         });
 
@@ -92,12 +87,15 @@ public class MainActivity extends AppCompatActivity implements LoadPropertiesTas
         mLayouManager = new LinearLayoutManager(this);
         mRecyclerview.setLayoutManager(mLayouManager);
         LoadPropertiesTask task = new LoadPropertiesTask(this);
-        task.execute();
+        Bundle extras = getIntent().getExtras();
 
-//        initGeofence();
+        String string = extras.getString(EXTRA_PRICE_MIN);
+        String string1 = extras.getString(EXTRA_PRICE_MAX);
+        task.execute(string, string1, extras.getString(EXTRA_ROOM_MIN));
+
     }
 
-    private void initGeofence() {
+    private void initGeofence(List<Property> data) {
         mApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
@@ -110,32 +108,22 @@ public class MainActivity extends AppCompatActivity implements LoadPropertiesTas
         mGeofenceStorage = new SimpleGeofenceStore(this);
         // Instantiate the current List of geofences.
         mGeofenceList = new ArrayList<Geofence>();
-        createGeofences();
+        createGeofences(data);
     }
 
-    private void createGeofences() {
-        mAndroidBuildingGeofence = new SimpleGeofence(
-                ANDROID_BUILDING_ID,                // geofenceId.
-                ANDROID_BUILDING_LATITUDE,
-                ANDROID_BUILDING_LONGITUDE,
-                ANDROID_BUILDING_RADIUS_METERS,
-                GEOFENCE_EXPIRATION_TIME,
-                Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT
-        );
-        mYerbaBuenaGeofence = new SimpleGeofence(
-                YERBA_BUENA_ID,                // geofenceId.
-                YERBA_BUENA_LATITUDE,
-                YERBA_BUENA_LONGITUDE,
-                YERBA_BUENA_RADIUS_METERS,
-                GEOFENCE_EXPIRATION_TIME,
-                Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT
-        );
+    private void createGeofences(List<Property> data) {
 
-        // Store these flat versions in SharedPreferences and add them to the geofence list.
-        mGeofenceStorage.setGeofence(ANDROID_BUILDING_ID, mAndroidBuildingGeofence);
-        mGeofenceStorage.setGeofence(YERBA_BUENA_ID, mYerbaBuenaGeofence);
-        mGeofenceList.add(mAndroidBuildingGeofence.toGeofence());
-        mGeofenceList.add(mYerbaBuenaGeofence.toGeofence());
+        for (Property property : data) {
+            SimpleGeofence geofence = new SimpleGeofence(
+                    ANDROID_BUILDING_RADIUS_METERS,
+                    GEOFENCE_EXPIRATION_TIME,
+                    Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT,
+                    property);
+            mGeofenceStorage.setGeofence(String.valueOf(property.getId()), geofence);
+            mGeofenceList.add(geofence.toGeofence());
+
+        }
+
     }
 
     @Override
@@ -168,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements LoadPropertiesTas
 
     @Override
     public void onDataLoaded(List<Property> data) {
+        mData = data;
         PropertiesAdapter adapter = new PropertiesAdapter(data);
         mRecyclerview.setAdapter(adapter);
     }
@@ -204,5 +193,16 @@ public class MainActivity extends AppCompatActivity implements LoadPropertiesTas
     private PendingIntent getGeofenceTransitionPendingIntent() {
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
         return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        for (Property property : mData) {
+            long id = property.getId();
+            if (mGeofenceStorage != null) {
+                mGeofenceStorage.clearGeofence(String.valueOf(id));
+            }
+        }
     }
 }

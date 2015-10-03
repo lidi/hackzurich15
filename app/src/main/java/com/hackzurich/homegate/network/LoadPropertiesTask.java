@@ -17,10 +17,11 @@ import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class LoadPropertiesTask extends AsyncTask<Object, Void, List<Property>> {
+public class LoadPropertiesTask extends AsyncTask<String, Void, List<Property>> {
 
-    public static final String TOKEN= "20c7209eda57e82b828027be7fca0e02";
-    public static final String URL= "https://api-2445581357976.apicast.io:443/rs/real-estates?language=en&chooseType=rentflat";
+    public static final String TOKEN = "20c7209eda57e82b828027be7fca0e02";
+    public static final String URL
+            = "https://api-2445581357976.apicast.io:443/rs/real-estates?language=en&zip=8005&chooseType=rentflat";
 
     Listener mListener;
     protected final ObjectMapper mMapper;
@@ -31,18 +32,21 @@ public class LoadPropertiesTask extends AsyncTask<Object, Void, List<Property>> 
     }
 
     @Override
-    protected List<Property> doInBackground(Object[] params) {
+    protected List<Property> doInBackground(String[] params) {
         java.net.URL url = null;
-            HttpsURLConnection mURLConnection = null;
+        HttpsURLConnection mURLConnection = null;
         try {
-            url = new URL(URL);
+            StringBuilder builder = new StringBuilder(URL);
+            builder.append("&rentFrom=").append(params[0]).append("&rentTo=").append(params[1])
+                    .append("&roomsFrom=").append(params[2]);
+            url = new URL(builder.toString());
             mURLConnection = (HttpsURLConnection) url.openConnection();
             mURLConnection.setDoInput(true);
             mURLConnection.setRequestMethod("GET");
             mURLConnection.setRequestProperty("auth", TOKEN);
             if (mURLConnection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                 InputStream in = new BufferedInputStream(mURLConnection.getInputStream());
-                PropertiesResponse response =  readStream(in);
+                PropertiesResponse response = readStream(in);
                 return response.getItems();
             }
         } catch (MalformedURLException e) {
@@ -79,7 +83,8 @@ public class LoadPropertiesTask extends AsyncTask<Object, Void, List<Property>> 
         mListener.onDataLoaded(o);
     }
 
-    public interface Listener{
+    public interface Listener {
+
         void onDataLoaded(List<Property> data);
     }
 }
