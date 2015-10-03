@@ -198,11 +198,5 @@ public class MainActivity extends AppCompatActivity implements LoadPropertiesTas
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        for (Property property : mData) {
-            long id = property.getId();
-            if (mGeofenceStorage != null) {
-                mGeofenceStorage.clearGeofence(String.valueOf(id));
-            }
-        }
     }
 }

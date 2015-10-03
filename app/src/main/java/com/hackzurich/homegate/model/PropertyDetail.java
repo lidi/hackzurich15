@@ -20,8 +20,18 @@ public class PropertyDetail {
     @JsonProperty("currency")
     private String mCurrency;
 
+    RatingResponse mRatingResponse;
+
     public String getIconUrl() {
         return mIconUrl;
+    }
+
+    public RatingResponse getRatingResponse() {
+        return mRatingResponse;
+    }
+
+    public void setRatingResponse(RatingResponse ratingResponse) {
+        mRatingResponse = ratingResponse;
     }
 
     public void setIconUrl(String iconUrl) {

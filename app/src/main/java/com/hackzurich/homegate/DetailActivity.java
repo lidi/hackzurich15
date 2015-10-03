@@ -5,6 +5,7 @@ import com.hackzurich.homegate.adapter.RatingsAdapter;
 import com.hackzurich.homegate.model.PropertyDetail;
 import com.hackzurich.homegate.model.Rating;
 import com.hackzurich.homegate.model.RatingRequest;
+import com.hackzurich.homegate.model.RatingResponse;
 import com.hackzurich.homegate.network.LoadDetailsTask;
 import com.hackzurich.homegate.network.PostReviewTask;
 
@@ -24,9 +25,8 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import java.text.NumberFormat;
 import java.util.List;
-
 
 public class DetailActivity extends AppCompatActivity implements LoadDetailsTask.Listener,
         View.OnClickListener, PostReviewTask.Listener {
@@ -59,20 +59,15 @@ public class DetailActivity extends AppCompatActivity implements LoadDetailsTask
 
         loadBackdrop();
 
-        LoadDetailsTask task = new LoadDetailsTask(this);
-        task.execute(mAddId);
+        fetchDetails();
 
         mCollapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         String name = extras.getString(EXTRA_TITLE);
         mCollapsingToolbar.setTitle(name);
 
-        mRatingBar = (RatingBar) findViewById(R.id.ratingBar);
-        mRatingBar.setRating(3.67F);
-
         mRecyclerview = (RecyclerView) findViewById(R.id.recyclerview);
         mLayouManager = new LinearLayoutManager(this);
         mRecyclerview.setLayoutManager(mLayouManager);
-        loadRating();
 
         mComment = (EditText) findViewById(R.id.textComment);
         mSubmit = (Button) findViewById(R.id.submit);
@@ -80,20 +75,35 @@ public class DetailActivity extends AppCompatActivity implements LoadDetailsTask
         mRatingBarUser = (RatingBar) findViewById(R.id.ratingBarUser);
     }
 
-    private void loadRating() {
-        List<Rating> ratings = new ArrayList<>();
-        Rating ratingOne = new Rating();
-        ratingOne.setRating(3F);
-        ratingOne.setComment("Decent flat, nothing fancy");
+    private void fetchDetails() {
+        LoadDetailsTask task = new LoadDetailsTask(this);
+        task.execute(mAddId);
+    }
 
-        Rating ratingTwo = new Rating();
-        ratingTwo.setRating(4F);
-        ratingTwo.setComment("Loved the view, but balcony sucks...");
-        ratings.add(ratingOne);
-        ratings.add(ratingTwo);
+    private void loadRating(RatingResponse ratingResponse) {
+        long avg = ratingResponse.getAvg();
+        if (ratingResponse != null && avg > -1) {
+            List<Rating> values = null;
+            List<Rating> ratings = ratingResponse.getRatings();
+            if (ratings.size() > 2) {
+                values = ratings.subList(0, 2);
+            } else {
+                values = ratings;
+            }
+            RatingsAdapter adapter = new RatingsAdapter(values);
+            mRecyclerview.setAdapter(adapter);
+            mRatingBar = (RatingBar) findViewById(R.id.ratingBar);
+            TextView ratingValue = (TextView) findViewById(R.id.ratingValue);
+            TextView voters = (TextView) findViewById(R.id.nrOfVoters);
+            voters.setText("(" + ratings.size() + ")");
+            NumberFormat format = NumberFormat.getNumberInstance();
+            format.setMinimumFractionDigits(2);
+            ratingValue.setText(format.format(avg));
+            mRatingBar.setRating(avg);
+        } else {
+            findViewById(R.id.ratingCard).setVisibility(View.GONE);
+        }
 
-        RatingsAdapter adapter = new RatingsAdapter(ratings);
-        mRecyclerview.setAdapter(adapter);
     }
 
     private void loadBackdrop() {
@@ -105,6 +115,7 @@ public class DetailActivity extends AppCompatActivity implements LoadDetailsTask
     public void onDataLoaded(PropertyDetail data) {
         TextView description = (TextView) findViewById(R.id.description);
         description.setText(data.getDescription());
+        loadRating(data.getRatingResponse());
     }
 
     @Override
@@ -120,11 +131,14 @@ public class DetailActivity extends AppCompatActivity implements LoadDetailsTask
     @Override
     public void onClick(View v) {
         PostReviewTask task = new PostReviewTask(this);
-        RatingRequest request = new RatingRequest();
-        request.setComment(mComment.getText().toString());
-        request.setRating(mRatingBarUser.getRating());
-        request.setId(mAddId);
-        task.execute(request);
+        float rating = mRatingBarUser.getRating();
+        if (rating>0) {
+            RatingRequest request = new RatingRequest();
+            request.setComment(mComment.getText().toString());
+            request.setRating(rating);
+            request.setId(mAddId);
+            task.execute(request);
+        }
     }
 
     @Override
@@ -134,5 +148,6 @@ public class DetailActivity extends AppCompatActivity implements LoadDetailsTask
         mRatingBarUser.setEnabled(false);
         mRatingBarUser.setIsIndicator(true);
         mComment.setEnabled(false);
+        fetchDetails();
     }
 }

@@ -56,6 +56,7 @@
             android:paddingTop="24dp">
 
             <android.support.v7.widget.CardView
+                android:id="@+id/ratingCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/card_margin"
@@ -80,9 +81,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
-                            android:text="3.67"
                             android:textAppearance="@style/TextAppearance.AppCompat.Title"
                             android:textSize="32dp"/>
+
 
                         <RatingBar
                             android:id="@+id/ratingBar"
@@ -93,6 +94,10 @@
                             android:layout_margin="8dp"
                             android:progressDrawable="@drawable/star_selector"/>
 
+                        <TextView
+                            android:id="@+id/nrOfVoters"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
 
                     </LinearLayout>
 
